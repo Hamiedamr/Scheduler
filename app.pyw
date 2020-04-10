@@ -47,10 +47,10 @@ class UI(QMainWindow):
             grid.addWidget(priority_label, 0, 3)
         for i in range(num_processes):
             if(priority_label):
-                grid.addWidget(QLineEdit(), i+1, 3)
-            grid.addWidget(QLineEdit(), i+1, 0)
-            grid.addWidget(QLineEdit(), i+1, 1)
-            grid.addWidget(QLineEdit(), i+1, 2)
+                grid.addWidget(QLineEdit(name="priority{}".format(i)), i+1, 3)
+            grid.addWidget(QLineEdit(name="process{}".format(i)), i+1, 0)
+            grid.addWidget(QLineEdit(name="arrival{}".format(i)), i+1, 1)
+            grid.addWidget(QLineEdit(name="burst{}".format(i)), i+1, 2)
         grid.addWidget(self.plot, 0, 5)
         self.process_info_group.setLayout(grid)
         self.process_info_group.setVisible(True)
