@@ -73,7 +73,7 @@ class UI(QMainWindow):
         if(priority_label):
             grid.addWidget(priority_label, 0, 3)
         elif(quantum_label):
-            grid.addWidget(quantum_label,0,3)
+            grid.addWidget(quantum_label, 0, 3)
 
         # Draw textboxes
         for i in range(1, num_processes+1):
@@ -143,21 +143,23 @@ class UI(QMainWindow):
                                for i in process_data])
         arrival_time = np.array(
             [float(process_data[i]['arrival']) for i in process_data])
-        departure_time = np.array([brust_time[0], 0])
+        departure_time = []
+        departure_time.insert(0, brust_time[0])
         for i in range(1, n):
-            departure_time[i] = brust_time[i] + departure_time[i-1]
-        average_turn_around_time = np.sum(departure_time - arrival_time) / n
-        average_wait_time = np.sum(
-            departure_time - arrival_time-brust_time) / n
+            departure_time.insert(i, brust_time[i] + departure_time[i-1])
+        average_turn_around_time=np.sum(np.array(departure_time) - np.array(arrival_time)) / n
+        average_wait_time=np.sum(
+            np.array(departure_time) - np.array(arrival_time)-np.array(brust_time)) / n
 
-        fig = plt.figure()
+        fig=plt.figure()
         for i in range(n):
-            p = patches.Rectangle((i*0.1, 0.2), brust_time[i]*0.1, 0.5, label="p"+str(i),color="red",fill=0)
+            p=patches.Rectangle(
+                (i*0.1, 0.2), brust_time[i]*0.1, 0.5, label="p"+str(i), color="red", fill=0)
             fig.add_artist(p)
         plt.show()
 
 
-app = QApplication(sys.argv)
-UIWindow = UI()
+app=QApplication(sys.argv)
+UIWindow=UI()
 
 app.exec_()
