@@ -44,14 +44,14 @@ class UI(QMainWindow):
     def clear_action(self):
         for i in reversed(range(grid.count())):
             grid.itemAt(i).widget().setParent(None)
-        self.next_action()
+        # self.next_action()
 
     def next_action(self):
         global num_processes
         num_processes = int(self.no_process_list.currentText())
 
         # Fetch the values of algorithm and number of processes
-
+        global algorithm_type
         algorithm_type = str(self.algorithm_list.currentText())
 
         # Initialize procecess data dictionary with process keys ex: first proces key is p1 and zero values
@@ -72,6 +72,8 @@ class UI(QMainWindow):
         grid.addWidget(burst_label, 0, 2)
         if(priority_label):
             grid.addWidget(priority_label, 0, 3)
+        elif(quantum_label):
+            grid.addWidget(quantum_label,0,3)
 
         # Draw textboxes
         for i in range(1, num_processes+1):
@@ -127,7 +129,8 @@ class UI(QMainWindow):
                 elif(self.process_data[i]['quantum']):
                     self.process_data[i]['quantum'] = self.process_data[i]['quantum'].text(
                     )
-            self.calc_fcfs(self.process_data)
+            if algorithm_type == "FCFS":
+                self.calc_fcfs(self.process_data)
             self.clear_action()
 
         except Exception as e:
