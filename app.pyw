@@ -168,8 +168,9 @@ class UI(QMainWindow):
         return slots
 
     def calc_SJFEnhanced(self, process_data):
-        process_data = OrderedDict(sorted(process_data.items(
-        ), key=lambda d: d[1]['brust']))
+        x = sorted(process_data.items(
+        ), key=lambda d:(d[1]['arrival'], d[1]['brust']))
+        process_data=OrderedDict(x)
 
         n = num_processes
         brust_time = np.array([float(process_data[i]['brust'])
@@ -190,7 +191,7 @@ class UI(QMainWindow):
 
     def calc_priorityEnhanced(self, process_data):
         process_data = OrderedDict(sorted(process_data.items(
-        ), key=lambda d: d[1]['priority']))
+        ), key=lambda d: (d[1]['arrival'], d[1]['priority'])))
         n = num_processes
         brust_time = np.array([float(process_data[i]['brust'])
                                for i in process_data])
@@ -207,6 +208,7 @@ class UI(QMainWindow):
             slots.append(Slot(process_names[i], begin, brust_time[i]))
 
         return slots
+
 
 app = QApplication(sys.argv)
 UIWindow = UI()
