@@ -4,3 +4,8 @@
 ## Project target is represnt different types of schedulling algorithms in OS graphically
 ### Algorithms reprensted are:
 - FCFS
+- Non Preemptive SJF
+- Preemptive SJF
+- Non Preemptive Priority
+- Preemptive Priority
+- Round Robbin
