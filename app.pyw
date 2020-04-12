@@ -66,15 +66,19 @@ class UI(QMainWindow):
         burst_label = QLabel("Brust Time", width="101", height="13")
         priority_label = False
         quantum_label = False
-        if "Priority" in algorithm_type:
+        global quantum_input
+        if "Priority" in algorithm_type:  # Priority label
             priority_label = QLabel("Prority", width="101", height="13")
-        elif "Round Robin" in algorithm_type:
+            grid.addWidget(priority_label, 0, 3)
+        elif "Round Robin" in algorithm_type:  # Quantum textbox and label
             quantum_label = QLabel("Quantum")
+            quantum_input = QLineEdit()
+            grid.addWidget(quantum_label, 0, 3)
+            grid.addWidget(quantum_input, 1, 3)
+
         grid.addWidget(process_num_label, 0, 0)
         grid.addWidget(arrival_label, 0, 1)
         grid.addWidget(burst_label, 0, 2)
-        if(priority_label):
-            grid.addWidget(priority_label, 0, 3)
 
         # Draw textboxes
         for i in range(1, num_processes+1):
@@ -86,13 +90,6 @@ class UI(QMainWindow):
                 priority_input.setObjectName("priority{}".format(i))
                 grid.addWidget(priority_input, i, 3)
                 self.process_data[i]['priority'] = priority_input
-
-            # Quantum textbox
-            elif(quantum_label):
-                quantum_input = QLineEdit()
-                quantum_input.setObjectName("quantum{}".format(i))
-                grid.addWidget(quantum_input, i, 3)
-                self.process_data[i]['quantum'] = quantum_input
 
             # Process name textbox
             process_name_input = QLineEdit()
@@ -140,6 +137,8 @@ class UI(QMainWindow):
 
             elif str(self.algorithm_list.currentText()) == ("Non Preemptive Priority"):
                 slots = self.calc_priorityEnhanced(self.process_data)
+            elif str(self.algorithm_list.currentText()) == ("Round Robin"):
+                slots = self.calc_roundRobinEnhanced(self.process_data)
 
             drawSlots(slots)
 
@@ -169,8 +168,8 @@ class UI(QMainWindow):
 
     def calc_SJFEnhanced(self, process_data):
         x = sorted(process_data.items(
-        ), key=lambda d:(d[1]['arrival'], d[1]['brust']))
-        process_data=OrderedDict(x)
+        ), key=lambda d: (d[1]['arrival'], d[1]['brust']))
+        process_data = OrderedDict(x)
 
         n = num_processes
         brust_time = np.array([float(process_data[i]['brust'])
@@ -206,6 +205,33 @@ class UI(QMainWindow):
             if i != 0:
                 begin += brust_time[i-1]
             slots.append(Slot(process_names[i], begin, brust_time[i]))
+
+        return slots
+
+    def calc_roundRobinEnhanced(self, process_data):
+        Q = int(quantum_input.text())
+        process_data = OrderedDict(sorted(process_data.items(
+        ), key=lambda d: d[1]['arrival']))
+        n = num_processes
+        brust_time = np.array([float(process_data[i]['brust'])
+                               for i in process_data])
+        arrival_time = np.array(
+            [float(process_data[i]['arrival']) for i in process_data])
+        process_names = np.array(
+            [process_data[i]['process-name'] for i in process_data])
+
+        slots = []
+        begin = 0
+        total_slots  = int(sum(brust_time) - (n-Q-1))
+        for j in range(total_slots):
+            if sum(brust_time) == 0:
+                break
+            for i in range(n):
+                if brust_time[i] != 0:
+                    brust_time[i] -= Q
+                    slots.append(Slot(process_names[i], begin, begin+Q))
+                    begin += Q
+                
 
         return slots
 
