@@ -6,6 +6,9 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+from Slot import Slot
+from Slot import drawSlots
+from collections import OrderedDict
 
 
 class UI(QMainWindow):
@@ -44,14 +47,14 @@ class UI(QMainWindow):
     def clear_action(self):
         for i in reversed(range(grid.count())):
             grid.itemAt(i).widget().setParent(None)
-        # self.next_action()
+        self.next_action()
 
     def next_action(self):
         global num_processes
         num_processes = int(self.no_process_list.currentText())
 
         # Fetch the values of algorithm and number of processes
-        global algorithm_type
+
         algorithm_type = str(self.algorithm_list.currentText())
 
         # Initialize procecess data dictionary with process keys ex: first proces key is p1 and zero values
@@ -63,17 +66,19 @@ class UI(QMainWindow):
         burst_label = QLabel("Brust Time", width="101", height="13")
         priority_label = False
         quantum_label = False
-        if "Priority" in algorithm_type:
+        global quantum_input
+        if "Priority" in algorithm_type:  # Priority label
             priority_label = QLabel("Prority", width="101", height="13")
-        elif "Round Robin" in algorithm_type:
+            grid.addWidget(priority_label, 0, 3)
+        elif "Round Robin" in algorithm_type:  # Quantum textbox and label
             quantum_label = QLabel("Quantum")
+            quantum_input = QLineEdit()
+            grid.addWidget(quantum_label, 0, 3)
+            grid.addWidget(quantum_input, 1, 3)
+
         grid.addWidget(process_num_label, 0, 0)
         grid.addWidget(arrival_label, 0, 1)
         grid.addWidget(burst_label, 0, 2)
-        if(priority_label):
-            grid.addWidget(priority_label, 0, 3)
-        elif(quantum_label):
-            grid.addWidget(quantum_label, 0, 3)
 
         # Draw textboxes
         for i in range(1, num_processes+1):
@@ -85,13 +90,6 @@ class UI(QMainWindow):
                 priority_input.setObjectName("priority{}".format(i))
                 grid.addWidget(priority_input, i, 3)
                 self.process_data[i]['priority'] = priority_input
-
-            # Quantum textbox
-            elif(quantum_label):
-                quantum_input = QLineEdit()
-                quantum_input.setObjectName("quantum{}".format(i))
-                grid.addWidget(quantum_input, i, 3)
-                self.process_data[i]['quantum'] = quantum_input
 
             # Process name textbox
             process_name_input = QLineEdit()
@@ -116,50 +114,129 @@ class UI(QMainWindow):
         self.process_info_group.setVisible(True)
 
     def plot_action(self):
+        # slots = [Slot("as", 0, 24),Slot("as", 24, 10),Slot("as", 34, 65)]
+        # drawSlots(slots)
         try:
+
             for i in range(1, num_processes+1):
                 self.process_data[i]['process-name'] = self.process_data[i]['process-name'].text()
-                self.process_data[i]['arrival'] = self.process_data[i]['arrival'].text(
-                )
-                self.process_data[i]['brust'] = self.process_data[i]['brust'].text(
-                )
+                self.process_data[i]['arrival'] = float(self.process_data[i]['arrival'].text(
+                ))
+                self.process_data[i]['brust'] = float(self.process_data[i]['brust'].text(
+                ))
                 if(self.process_data[i]['priority']):
-                    self.process_data[i]['priority'] = self.process_data[i]['priority'].text(
-                    )
+                    self.process_data[i]['priority'] = float(self.process_data[i]['priority'].text(
+                    ))
                 elif(self.process_data[i]['quantum']):
-                    self.process_data[i]['quantum'] = self.process_data[i]['quantum'].text(
-                    )
-            if algorithm_type == "FCFS":
-                self.calc_fcfs(self.process_data)
+                    self.process_data[i]['quantum'] = float(self.process_data[i]['quantum'].text(
+                    ))
+            if str(self.algorithm_list.currentText()) == ("FCFS"):
+                slots = self.calc_fcfsEnhanced(self.process_data)
+            elif str(self.algorithm_list.currentText()) == ("Non Preemptive SJF"):
+                slots = self.calc_SJFEnhanced(self.process_data)
+
+            elif str(self.algorithm_list.currentText()) == ("Non Preemptive Priority"):
+                slots = self.calc_priorityEnhanced(self.process_data)
+            elif str(self.algorithm_list.currentText()) == ("Round Robin"):
+                slots = self.calc_roundRobinEnhanced(self.process_data)
+
+            drawSlots(slots)
+
             self.clear_action()
 
         except Exception as e:
             print(e)
             self.clear_action()
 
-    def calc_fcfs(self, process_data):
+    def calc_fcfsEnhanced(self, process_data):
         n = num_processes
         brust_time = np.array([float(process_data[i]['brust'])
                                for i in process_data])
         arrival_time = np.array(
             [float(process_data[i]['arrival']) for i in process_data])
-        departure_time = []
-        departure_time.insert(0, brust_time[0])
-        for i in range(1, n):
-            departure_time.insert(i, brust_time[i] + departure_time[i-1])
-        average_turn_around_time=np.sum(np.array(departure_time) - np.array(arrival_time)) / n
-        average_wait_time=np.sum(
-            np.array(departure_time) - np.array(arrival_time)-np.array(brust_time)) / n
+        process_names = np.array(
+            [process_data[i]['process-name'] for i in process_data])
 
-        fig=plt.figure()
+        slots = []
+        begin = 0
         for i in range(n):
-            p=patches.Rectangle(
-                (i*0.1, 0.2), brust_time[i]*0.1, 0.5, label="p"+str(i), color="red", fill=0)
-            fig.add_artist(p)
-        plt.show()
+            if i != 0:
+                begin += brust_time[i-1]
+            slots.append(Slot(process_names[i], begin, brust_time[i]))
+
+        return slots
+
+    def calc_SJFEnhanced(self, process_data):
+        x = sorted(process_data.items(
+        ), key=lambda d: (d[1]['arrival'], d[1]['brust']))
+        process_data = OrderedDict(x)
+
+        n = num_processes
+        brust_time = np.array([float(process_data[i]['brust'])
+                               for i in process_data])
+        arrival_time = np.array(
+            [float(process_data[i]['arrival']) for i in process_data])
+        process_names = np.array(
+            [process_data[i]['process-name'] for i in process_data])
+
+        slots = []
+        begin = 0
+        for i in range(n):
+            if i != 0:
+                begin += brust_time[i-1]
+            slots.append(Slot(process_names[i], begin, brust_time[i]))
+
+        return slots
+
+    def calc_priorityEnhanced(self, process_data):
+        process_data = OrderedDict(sorted(process_data.items(
+        ), key=lambda d: (d[1]['arrival'], d[1]['priority'])))
+        n = num_processes
+        brust_time = np.array([float(process_data[i]['brust'])
+                               for i in process_data])
+        arrival_time = np.array(
+            [float(process_data[i]['arrival']) for i in process_data])
+        process_names = np.array(
+            [process_data[i]['process-name'] for i in process_data])
+
+        slots = []
+        begin = 0
+        for i in range(n):
+            if i != 0:
+                begin += brust_time[i-1]
+            slots.append(Slot(process_names[i], begin, brust_time[i]))
+
+        return slots
+
+    def calc_roundRobinEnhanced(self, process_data):
+        Q = int(quantum_input.text())
+        process_data = OrderedDict(sorted(process_data.items(
+        ), key=lambda d: d[1]['arrival']))
+        n = num_processes
+        brust_time = np.array([float(process_data[i]['brust'])
+                               for i in process_data])
+        arrival_time = np.array(
+            [float(process_data[i]['arrival']) for i in process_data])
+        process_names = np.array(
+            [process_data[i]['process-name'] for i in process_data])
+
+        slots = []
+        begin = 0
+        total_slots  = int(sum(brust_time) - (n-Q-1))
+        for j in range(total_slots):
+            if sum(brust_time) == 0:
+                break
+            for i in range(n):
+                if brust_time[i] != 0:
+                    brust_time[i] -= Q
+                    slots.append(Slot(process_names[i], begin, begin+Q))
+                    begin += Q
+                
+
+        return slots
 
 
-app=QApplication(sys.argv)
-UIWindow=UI()
+app = QApplication(sys.argv)
+UIWindow = UI()
 
 app.exec_()

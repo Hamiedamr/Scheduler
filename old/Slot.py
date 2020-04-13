@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 matplotlib.rcParams.update({'font.size': 7})
+
 def drawSlots(slots):
     fig = plt.figure()
     left = .1
@@ -22,28 +23,24 @@ def drawSlots(slots):
         width = [s.slotTime][0] * widthRange
         processBegin = [s.slotStart][0]
         slotName = [s.processName][0]
-
         p = patches.Rectangle( (start, bottom), width, height, label="p", color="red", fill=0 )
         # start time of the process
         fig.text( start, bottom, str( int( processBegin ) ), horizontalalignment='left', verticalalignment='top' )
         # proces name
         fig.text( start, height / 2 + bottom, slotName, horizontalalignment='left', verticalalignment='top' )
         fig.add_artist( p )
+    frist = False
+    if frist == False:
         fig.text( start + width, bottom, str( int( processBegin + s.slotTime ) ), horizontalalignment='left',
-              verticalalignment='top' )
-
+                  verticalalignment='top' )
         fig.add_artist( p )
 
     plt.show()
 class Slot:
-    def __init__(self, processName, slotStart, slotTime, arrival_time):
-            self.processName = processName
-            self.slotStart = float( slotStart )
-            self.slotTime = float( slotTime )
-            self.arrival_time = float( arrival_time )
-
-
-
+    def __init__(self, processName, slotStart,slotTime ):
+        self.processName = processName
+        self.slotStart = float(slotStart)
+        self.slotTime = float(slotTime)
 
 
 
