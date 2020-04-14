@@ -204,8 +204,9 @@ class UI(QMainWindow):
             if str(self.algorithm_list.currentText()) == (
                     "Non Preemptive SJF"):
                 self.drawSlots_sjf(slots_1)
-            else:  # drawSlots( slots )
-                self.drawSlots_sjf(slots)
+            else:
+                drawSlots(slots)
+                # self.drawSlots_sjf(slots)
             self.clear_action()
 
         except Exception as e:
@@ -226,11 +227,21 @@ class UI(QMainWindow):
 
         slots = []
         begin = arrival_time[0]
-        for i in range(n):
-            if i != 0:
-                begin += brust_time[i - 1]
-            slots.append(
-                Slot(process_names[i], begin, brust_time[i], arrival_time[i]))
+        i = 0
+        while i < n:
+            if begin < arrival_time[i]:
+                begin += 1
+                continue
+            else:
+                if i !=0:
+                    slots.append(
+                        Slot(process_names[i], begin, brust_time[i], arrival_time[i]))
+                    begin += brust_time[i]
+                else:
+                    slots.append(
+                        Slot(process_names[i], begin, brust_time[i], arrival_time[i]))
+
+            i += 1
 
         return slots
 
@@ -373,7 +384,8 @@ class UI(QMainWindow):
                     else:
                         brust_time[i] -= int(Q/2)
                     # nta kont bt add begin 3la Q w da 8lat anta  el solt  el brust bt3o Q bas
-                        slots.append(Slot(process_names[i], begin,  int(Q/2), arrival_time[i]))
+                        slots.append(
+                            Slot(process_names[i], begin,  int(Q/2), arrival_time[i]))
                     begin += Q
                 i += 1
             i = 0
