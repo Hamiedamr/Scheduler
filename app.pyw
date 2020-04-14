@@ -10,6 +10,7 @@ from Slot import Slot
 from Slot import drawSlots
 from collections import OrderedDict
 
+
 class UI(QMainWindow):
 
     def __init__(self):
@@ -68,15 +69,15 @@ class UI(QMainWindow):
                     (start[i], bottom), width[i], height, label="p", color="red", fill=0)
                 # start time of the process
                 fig.text(start[i], bottom, str(int((start[i] * 100))), horizontalalignment='left',
-                          verticalalignment='top')
+                         verticalalignment='top')
                 # proces name
                 fig.text(start[i], height / 2 + bottom, slotName,
                          horizontalalignment='left', verticalalignment='top')
                 fig.add_artist(p)
                 # process end time
                 fig.text(start[i] + width[i], bottom, str(int((start[i] * 100) + s.slotTime)),
-                          horizontalalignment='left',
-                          verticalalignment='top')
+                         horizontalalignment='left',
+                         verticalalignment='top')
 
                 fig.add_artist(p)
             else:
@@ -85,15 +86,15 @@ class UI(QMainWindow):
                     (start[i], bottom), width[i], height, label="p", color="red", fill=0)
                 # start time of the process
                 fig.text(start[i], bottom, str(int(processBegin[i])), horizontalalignment='left',
-                          verticalalignment='top')
+                         verticalalignment='top')
                 # proces name
                 fig.text(start[i], height / 2 + bottom, slotName,
                          horizontalalignment='left', verticalalignment='top')
                 fig.add_artist(p)
                 # process end time
                 fig.text(start[i] + width[i], bottom, str(int(processBegin[i] + s.slotTime)),
-                          horizontalalignment='left',
-                          verticalalignment='top')
+                         horizontalalignment='left',
+                         verticalalignment='top')
                 fig.add_artist(p)
             i += 1
 
@@ -201,7 +202,8 @@ class UI(QMainWindow):
                 slots_1 = self.calc_SJFEnhanced(self.process_data)
 
             if str(self.algorithm_list.currentText()) == (
-                "Non Preemptive SJF"): self.drawSlots_sjf(slots_1)
+                    "Non Preemptive SJF"):
+                self.drawSlots_sjf(slots_1)
             else:  # drawSlots( slots )
                 self.drawSlots_sjf(slots)
             self.clear_action()
@@ -216,7 +218,7 @@ class UI(QMainWindow):
         process_data = OrderedDict(x)
         n = num_processes
         brust_time = np.array([float(process_data[i]['brust'])
-                                for i in process_data])
+                               for i in process_data])
         arrival_time = np.array(
             [float(process_data[i]['arrival']) for i in process_data])
         process_names = np.array(
@@ -239,7 +241,7 @@ class UI(QMainWindow):
 
         n = num_processes
         brust_time = np.array([float(process_data[i]['brust'])
-                                for i in process_data])
+                               for i in process_data])
         arrival_time = np.array(
             [float(process_data[i]['arrival']) for i in process_data])
         process_names = np.array(
@@ -262,13 +264,13 @@ class UI(QMainWindow):
        # print(process_data)
         n = num_processes
         brust_time = np.array([float(process_data[i]['brust'])
-                                for i in process_data])
+                               for i in process_data])
         arrival_time = np.array(
             [float(process_data[i]['arrival']) for i in process_data])
         process_names = np.array(
             [process_data[i]['process-name'] for i in process_data])
         priorities = np.array([float(process_data[i]['priority'])
-                              for i in process_data])
+                               for i in process_data])
 
         slots = []
         begin = arrival_time[0]
@@ -286,24 +288,26 @@ class UI(QMainWindow):
                         Slot(process_names[i], begin, brust_time[i], arrival_time[i]))
 
                 else:
-                     indx = np.argmin(priorities)
-                     priorities[indx] = 9999
-                     slots.append( Slot( process_names[indx], begin, brust_time[indx] ,arrival_time[indx]) )
-                    
+                    indx = np.argmin(priorities)
+                    priorities[indx] = 9999
+                    slots.append(
+                        Slot(process_names[indx], begin, brust_time[indx], arrival_time[indx]))
 
             else:
                 indx = i
                 priorities[indx] = 9999
-                slots.append( Slot( process_names[indx], begin, brust_time[indx] ,arrival_time[indx]) )
+                slots.append(
+                    Slot(process_names[indx], begin, brust_time[indx], arrival_time[indx]))
             i += 1
         return slots
+
     def calc_sjf_pree(self, process_data):
         process_data = OrderedDict(sorted(process_data.items(
         ), key=lambda d: (d[1]['arrival'], d[1]['brust'])))
        # print(process_data)
         n = num_processes
         brust_time = np.array([float(process_data[i]['brust'])
-                                for i in process_data])
+                               for i in process_data])
         arrival_time = np.array(
             [float(process_data[i]['arrival']) for i in process_data])
         process_names = np.array(
@@ -325,47 +329,51 @@ class UI(QMainWindow):
                         Slot(process_names[i], begin, brust_time[i], arrival_time[i]))
 
                 else:
-                     indx = np.argmin(brust_time)
-                     brust_time[indx]-= begin
-                     slots.append( Slot( process_names[indx], begin, brust_time[indx] ,arrival_time[indx]) )
-                    
+                    indx = np.argmin(brust_time)
+                    brust_time[indx] -= begin
+                    slots.append(
+                        Slot(process_names[indx], begin, brust_time[indx], arrival_time[indx]))
 
             else:
                 indx = i
                 brust_time[indx] -= begin
-                slots.append( Slot( process_names[indx], begin, arrival_time[indx+1] ,arrival_time[indx]) )
+                slots.append(
+                    Slot(process_names[indx], begin, arrival_time[indx+1], arrival_time[indx]))
             i += 1
         return slots
 
-    
-    
-    
     def calc_roundRobinEnhanced(self, process_data):
-        Q = float( quantum_input.text() )
-        process_data = OrderedDict( sorted( process_data.items(
-        ), key=lambda d: d[1]['arrival'] ) )
+        Q = float(quantum_input.text())
+        process_data = OrderedDict(sorted(process_data.items(
+        ), key=lambda d: d[1]['arrival']))
         n = num_processes
-        brust_time = np.array( [float( process_data[i]['brust'] )
-                                for i in process_data] )
+        brust_time = np.array([float(process_data[i]['brust'])
+                               for i in process_data])
         arrival_time = np.array(
-            [float( process_data[i]['arrival'] ) for i in process_data] )
+            [float(process_data[i]['arrival']) for i in process_data])
         process_names = np.array(
-            [process_data[i]['process-name'] for i in process_data] )
+            [process_data[i]['process-name'] for i in process_data])
 
         slots = []
-        begin = arrival_time[0] # anta btbtdy mn el arrival time bt3 awl wa7dah mesh zero
-        total_slots = int( sum( brust_time ) - (n - Q - 1) )
+        # anta btbtdy mn el arrival time bt3 awl wa7dah mesh zero
+        begin = arrival_time[0]
+        # total_slots = int( sum( brust_time ) - (n - Q - 1) )
         i = 0
-        for j in range( total_slots ):
-            if sum( brust_time ) == 0:
-                break
-            while i < n :
+
+        while np.sum(brust_time) > 0:
+            while i < n:
                 if brust_time[i] != 0:
                     if begin < arrival_time[i]:
                         begin += Q
                         continue
-                    brust_time[i] -= Q
-                    slots.append( Slot(process_names[i], begin,  Q,arrival_time[i]))# nta kont bt add begin 3la Q w da 8lat anta  el solt  el brust bt3o Q bas
+                    if Q <= brust_time[i]:
+                        brust_time[i] -= Q
+                        slots.append(
+                            Slot(process_names[i], begin,  int(Q), arrival_time[i]))
+                    else:
+                        brust_time[i] -= int(Q/2)
+                    # nta kont bt add begin 3la Q w da 8lat anta  el solt  el brust bt3o Q bas
+                        slots.append(Slot(process_names[i], begin,  int(Q/2), arrival_time[i]))
                     begin += Q
                 i += 1
             i = 0
@@ -375,63 +383,61 @@ class UI(QMainWindow):
     def get_current_pri(self, process_data, time):
         min = 10000000000
         minindex = 0
-        x= len(process_data)
+        x = len(process_data)
         thereIsProcess = 0
-        for i in range(1, x+1 ):
+        for i in range(1, x+1):
             if time >= process_data[i]['arrival'] and int(process_data[i]['brust']) != 0:
                 if int(process_data[i]['priority']) <= min:
                     min = int(process_data[i]['priority'])
                     minindex = i
-                    thereIsProcess=1
+                    thereIsProcess = 1
 
-        if(thereIsProcess>0):
+        if(thereIsProcess > 0):
             return minindex
         else:
             return -1
 
     def calc_priority_pree(self, process_data):
-        x = sorted( process_data.items(
-        ), key=lambda d: (d[1]['arrival']) )
-        process_data = OrderedDict( x )
+        x = sorted(process_data.items(
+        ), key=lambda d: (d[1]['arrival']))
+        process_data = OrderedDict(x)
         n = num_processes
-        brust_time = np.array( [float( process_data[i]['brust'] )
-                                for i in process_data] )
+        brust_time = np.array([float(process_data[i]['brust'])
+                               for i in process_data])
         arrival_time = np.array(
-            [float( process_data[i]['arrival'] ) for i in process_data] )
+            [float(process_data[i]['arrival']) for i in process_data])
         process_names = np.array(
-            [process_data[i]['process-name'] for i in process_data] )
+            [process_data[i]['process-name'] for i in process_data])
 
         slots = []
         begin = 0
-        full_time = sum( brust_time )
+        full_time = sum(brust_time)
         current_process = 0
         previvous_process = -2
         # i = arrival_time[0]
         for i in range(int(full_time+arrival_time[0])):
-            current_process = self.get_current_pri( process_data, i )-1
+            current_process = self.get_current_pri(process_data, i)-1
 
-            if(current_process <0):
+            if(current_process < 0):
                 begin += 1
                 continue
-            if current_process != previvous_process :
+            if current_process != previvous_process:
                 previvous_process = current_process
-                slots.append( Slot( process_names[current_process], begin, 1 ) )
+                slots.append(Slot(process_names[current_process], begin, 1))
             else:
-                i=0
+                i = 0
                 for s in slots:
-                   if(i==len(slots)-1):
-                       s.slotTime+=1
-                   i+=1
+                    if(i == len(slots)-1):
+                        s.slotTime += 1
+                    i += 1
 
-
-
-            begin+=1
+            begin += 1
             process_data[current_process+1]['brust'] -= 1
 
         return slots
 
 
-app = QApplication( sys.argv )
+app = QApplication(sys.argv)
 UIWindow = UI()
 
 app.exec_()
